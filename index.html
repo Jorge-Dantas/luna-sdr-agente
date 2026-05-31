@@ -2,136 +2,278 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luna SDR — Agente de Prospecção 24/7</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<meta name="description" content="Agente SDR autonomo 24/7. Prospecta, qualifica e agenda reunioes enquanto voce dorme.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=VT323&family=Geist+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#020617;color:#f8fafc;font-family:'Inter',sans-serif}
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 20px;background:linear-gradient(135deg,#020617 0%,#0f0a2e 50%,#020617 100%)}
-.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:24px}
-.hero h1 span{color:#7c3aed}
-.hero p{font-size:1.2rem;color:#94a3b8;max-width:600px;margin:0 auto 40px}
-.btn-cta{background:#fbbf24;color:#000;padding:18px 40px;border-radius:12px;font-weight:700;font-size:1.1rem;text-decoration:none;display:inline-block;transition:transform 0.1s}
-.btn-cta:hover{transform:scale(1.03);background:#f59e0b}
-.section{padding:80px 20px;max-width:1100px;margin:0 auto}
-.section h2{font-size:2rem;font-weight:700;margin-bottom:48px;text-align:center}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
-.card{background:#0f172a;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px;transition:transform 0.2s}
-.card:hover{transform:translateY(-4px);box-shadow:0 0 24px rgba(124,58,237,0.3)}
-.card-icon{font-size:2rem;margin-bottom:12px}
-.card h3{font-size:1.1rem;font-weight:600;margin-bottom:8px;color:#a78bfa}
-.card p{color:#94a3b8;font-size:0.95rem;line-height:1.6}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin:60px 0}
-.stat{text-align:center;padding:32px;background:#0f172a;border-radius:16px;border:1px solid rgba(124,58,237,0.2)}
-.stat-num{font-size:3rem;font-weight:900;color:#7c3aed}
-.stat-label{color:#94a3b8;margin-top:8px}
-.pricing{background:#0f172a;border:2px solid #7c3aed;border-radius:24px;padding:48px;text-align:center;max-width:500px;margin:0 auto}
-.price{font-size:3.5rem;font-weight:900;color:#fbbf24}
-.price span{font-size:1.2rem;color:#94a3b8}
-.price-features{list-style:none;margin:32px 0;text-align:left}
-.price-features li{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);color:#94a3b8}
-.price-features li::before{content:"✓ ";color:#7c3aed;font-weight:700}
-footer{text-align:center;padding:40px 20px;color:#475569;border-top:1px solid rgba(255,255,255,0.06)}
-footer a{color:#7c3aed;text-decoration:none}
-@media(max-width:640px){.hero h1{font-size:1.8rem}.btn-cta{width:100%;text-align:center}.price{font-size:2.5rem}}
+:root{--bg:#0a0a0a;--bg-card:#0a0a0a;--bg-card-hover:#111;--purple:#7c3aed;--purple-alt:#8b5cf6;--purple-dim:#a78bfa;--purple-dark:#2e1065;--purple-glow:rgba(124,58,237,0.5);--purple-glow-strong:rgba(124,58,237,0.7);--red:#ff3030;--red-alt:#ff5555;--red-glow:rgba(255,48,48,0.55);--cyan:#00d4ff;--cyan-glow:rgba(0,212,255,0.5);--text:#e8e6df;--text-mute:#a3a3a3;--text-dim:#666;--text-purple:#a78bfa;--border-purple:rgba(124,58,237,0.4);--border-strong:rgba(124,58,237,0.7);--glow-soft:0 0 8px rgba(124,58,237,0.35);--glow:0 0 12px rgba(124,58,237,0.45),0 0 24px rgba(124,58,237,0.18);--glow-strong:0 0 14px rgba(124,58,237,0.6),0 0 32px rgba(124,58,237,0.3)}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:16px;line-height:1.6;overflow-x:hidden;min-height:100vh}
+canvas#matrix-rain{position:fixed;inset:0;z-index:0;opacity:0.13;pointer-events:none}
+body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(124,58,237,0.03) 0,rgba(124,58,237,0.03) 1px,transparent 1px,transparent 3px);mix-blend-mode:overlay;opacity:0.6}
+body::after{content:"";position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.55) 100%)}
+.content{position:relative;z-index:10}.container{max-width:1240px;margin:0 auto;padding:0 24px}
+.alert-bar{position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#c91414,#ff3030 30%,#ff5555 50%,#ff3030 70%,#c91414);background-size:200% 100%;animation:alert-shimmer 6s linear infinite;border-bottom:1px solid rgba(255,48,48,0.5);box-shadow:0 0 18px rgba(255,48,48,0.5)}
+.alert-inner{max-width:1240px;margin:0 auto;padding:9px 18px;display:flex;align-items:center;justify-content:center;gap:12px}
+.alert-text{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:800;color:#fff;letter-spacing:1.5px;text-transform:uppercase;text-shadow:0 0 6px rgba(0,0,0,0.5);white-space:nowrap}
+.alert-pulse{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 10px #fff,0 0 18px rgba(255,255,255,0.7);animation:pulse 1.6s ease-in-out infinite;flex-shrink:0}
+@keyframes alert-shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(7,7,7,0.96);border-bottom:1px dashed var(--border-purple)}
+.topbar-inner{max-width:1240px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand-mark{font-family:'VT323',monospace;font-size:26px;color:var(--purple);text-shadow:0 0 8px var(--purple-glow);letter-spacing:1px}
+.brand-tag{font-size:11px;color:var(--text-purple);letter-spacing:2px;text-transform:uppercase}
+.btn-mini{padding:9px 18px;background:transparent;border:1px solid var(--purple);color:var(--purple);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;border-radius:4px;transition:all 0.2s}
+.btn-mini:hover{background:var(--purple);color:#fff;box-shadow:0 0 14px var(--purple-glow)}
+.hero{padding:70px 0 100px}.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:40px}}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed var(--border-purple);border-radius:4px;font-size:11px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:26px;background:rgba(124,58,237,0.04)}
+.hero-tag .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:pulse 1.6s ease-in-out infinite;box-shadow:0 0 8px var(--purple-glow-strong)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
+h1.hero-title{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:clamp(44px,6.4vw,92px);line-height:1.02;color:var(--purple);text-shadow:0 0 20px var(--purple-glow),0 0 42px rgba(124,58,237,0.18);margin-bottom:28px;letter-spacing:-0.5px}
+h1.hero-title .accent{color:var(--text);text-shadow:none}
+.hero-sub{font-family:'Geist Mono','JetBrains Mono',monospace;font-size:clamp(18px,1.9vw,22px);line-height:1.55;color:var(--text);margin-bottom:22px;max-width:60ch}
+.hero-sub strong{color:var(--purple-alt);font-weight:600}
+.hero-stamp{display:inline-block;margin-top:14px;padding:12px 18px;border:1px solid rgba(124,58,237,0.22);background:rgba(124,58,237,0.05);font-family:'Geist Mono','JetBrains Mono',monospace;font-size:16px;color:var(--text);line-height:1.45}
+.hero-stamp b{color:var(--purple);font-weight:700}
+.btn{display:inline-block;padding:18px 36px;background:var(--purple);color:#fff;font-family:'JetBrains Mono',monospace;font-weight:800;text-decoration:none;border-radius:4px;letter-spacing:2.5px;text-transform:uppercase;font-size:14px;transition:all 0.22s;border:1px solid var(--purple);cursor:pointer;margin-top:20px}
+.btn:hover{box-shadow:0 0 28px var(--purple-glow-strong);transform:translateY(-2px);background:var(--purple-alt)}
+.hero-image-wrap{position:relative;border:1px dashed var(--border-purple);border-radius:8px;background:var(--bg-card);overflow:hidden;box-shadow:var(--glow)}
+.term-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:rgba(124,58,237,0.05);border-bottom:1px dashed var(--border-purple)}
+.term-dot{width:11px;height:11px;border-radius:50%}.term-dot.r{background:#ff5f57}.term-dot.y{background:#febc2e}.term-dot.g{background:#28c840}
+.term-bar .term-title{margin-left:12px;font-size:11px;color:var(--text-dim);letter-spacing:1px}
+.term-content{padding:24px;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.8;color:var(--text-mute);min-height:200px}
+.stats{border-top:1px dashed var(--border-purple);border-bottom:1px dashed var(--border-purple);padding:36px 0;background:rgba(124,58,237,0.02)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;text-align:center}
+@media(max-width:800px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-num{font-family:'VT323',monospace;font-size:52px;color:var(--purple);text-shadow:0 0 14px var(--purple-glow);line-height:1}
+.stat-label{font-size:12px;color:var(--text-mute);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+section{padding:100px 0;position:relative}
+.section-tag{display:inline-block;font-size:12px;color:var(--purple);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;padding:6px 12px;border:1px dashed var(--border-purple);border-radius:3px}
+h2{font-family:'JetBrains Mono',monospace;font-size:clamp(32px,4.6vw,64px);font-weight:800;color:var(--purple);line-height:1.05;text-shadow:0 0 14px var(--purple-glow);margin-bottom:18px}
+h2 .accent{color:var(--text);text-shadow:none}
+.section-lead{font-family:'Geist Mono','JetBrains Mono',monospace;font-size:19px;color:var(--text);max-width:70ch;margin-bottom:60px;line-height:1.6}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.agent-card{background:var(--bg-card);border:1px dashed var(--border-purple);border-radius:8px;padding:28px;font-family:'JetBrains Mono',monospace;transition:all 0.3s;position:relative;overflow:hidden}
+.agent-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0;transition:opacity 0.3s}
+.agent-card:hover{border-color:var(--border-strong);box-shadow:var(--glow);transform:translateY(-3px);background:var(--bg-card-hover)}
+.agent-card:hover::before{opacity:1}
+.agent-icon{font-family:'VT323',monospace;font-size:32px;color:var(--purple);text-shadow:0 0 10px var(--purple-glow);margin-bottom:12px}
+.agent-name{font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+.agent-role{font-size:14px;color:var(--purple-alt);font-style:italic;margin-bottom:14px;font-family:'Geist Mono','JetBrains Mono',monospace}
+.agent-desc{font-size:13px;color:var(--text-mute);line-height:1.6;font-family:'Geist Mono','JetBrains Mono',monospace}
+.positioning{padding:130px 0;background:linear-gradient(180deg,transparent,rgba(255,48,48,0.04),transparent)}
+.positioning-block{max-width:980px;margin:0 auto;text-align:center;padding:72px 32px;border:2px solid var(--red);border-radius:10px;background:rgba(255,48,48,0.04);box-shadow:0 0 30px rgba(255,48,48,0.25),inset 0 0 30px rgba(255,48,48,0.04);position:relative}
+.positioning-block::before{content:"// SISTEMA";position:absolute;top:-12px;left:32px;background:var(--bg);padding:0 12px;font-size:11px;color:var(--red);letter-spacing:3px;font-family:'JetBrains Mono',monospace}
+.positioning-block .neg{font-family:'JetBrains Mono',monospace;font-size:clamp(28px,4.5vw,56px);font-weight:800;color:var(--red);text-shadow:0 0 18px var(--red-glow);line-height:1.05;margin-bottom:30px;letter-spacing:-0.5px}
+.positioning-block .pos{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3vw,38px);font-weight:700;color:var(--purple);text-shadow:0 0 14px var(--purple-glow);line-height:1.25;letter-spacing:-0.2px}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px}
+.step-card{background:var(--bg-card);border:1px dashed var(--border-purple);border-radius:8px;padding:32px;font-family:'JetBrains Mono',monospace;transition:all 0.3s}
+.step-card:hover{border-color:var(--border-strong);box-shadow:var(--glow-soft);transform:translateY(-2px)}
+.step-num{font-family:'VT323',monospace;font-size:52px;color:var(--purple);text-shadow:0 0 10px var(--purple-glow);line-height:1;margin-bottom:12px}
+.step-title{font-size:16px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.step-desc{font-size:14px;color:var(--text-mute);line-height:1.6;font-family:'Geist Mono','JetBrains Mono',monospace}
+.pricing-section{padding:110px 0 130px}
+.pricing-card{max-width:720px;margin:50px auto 0;background:var(--bg-card);border:2px solid var(--purple);border-radius:10px;padding:60px 48px;font-family:'JetBrains Mono',monospace;text-align:center;position:relative;box-shadow:var(--glow-strong)}
+.pricing-card::before{content:"// INVESTIMENTO";position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 16px;font-size:11px;color:var(--purple);letter-spacing:3px}
+.pricing-row{padding:24px 0;border-bottom:1px dashed var(--border-purple)}
+.pricing-row:last-of-type{border-bottom:none}
+.pricing-row .label{font-size:12px;color:var(--text-mute);text-transform:uppercase;letter-spacing:3px;margin-bottom:10px;font-family:'Geist Mono','JetBrains Mono',monospace}
+.pricing-row .amount{font-size:clamp(36px,5vw,56px);color:var(--purple);font-weight:800;text-shadow:0 0 14px var(--purple-glow);line-height:1}
+.pricing-row .amount small{font-size:18px;color:var(--text-mute);font-weight:400;margin-left:6px}
+.pricing-row .note{font-size:13px;color:var(--text-mute);margin-top:8px;font-family:'Geist Mono','JetBrains Mono',monospace}
+.pricing-features{list-style:none;padding:0;margin:24px 0;text-align:left}
+.pricing-features li{padding:12px 0 12px 22px;border-bottom:1px dashed rgba(124,58,237,0.15);color:var(--text);font-size:15px;position:relative;font-family:'Geist Mono','JetBrains Mono',monospace}
+.pricing-features li:last-child{border-bottom:none}
+.pricing-features li::before{content:"▸";position:absolute;left:4px;color:var(--purple);font-weight:700}
+.pricing-card .btn{margin-top:20px;padding:20px 48px;font-size:15px;display:inline-block}
+footer{padding:60px 0 36px;border-top:1px dashed var(--border-purple);background:rgba(124,58,237,0.02)}
+.footer-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-bottom:40px}
+@media(max-width:700px){.footer-trio{grid-template-columns:1fr}}
+.power{text-align:center;padding:22px;border:1px dashed var(--border-purple);border-radius:6px;font-family:'JetBrains Mono',monospace;background:rgba(124,58,237,0.02)}
+.power .ic{font-family:'VT323',monospace;font-size:38px;margin-bottom:6px;line-height:1}
+.power.luna .ic{color:var(--purple);text-shadow:0 0 12px var(--purple-glow)}
+.power.openclaw .ic{color:var(--red);text-shadow:0 0 12px var(--red-glow)}
+.power.telegram .ic{color:var(--cyan);text-shadow:0 0 12px var(--cyan-glow)}
+.power .name{font-size:16px;color:var(--text);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.power .tag{font-size:11px;color:var(--text-mute);letter-spacing:1.5px;margin-top:4px}
+.copyright{text-align:center;font-size:12px;color:var(--text-dim);letter-spacing:1.5px;font-family:'JetBrains Mono',monospace}
+@keyframes blink{50%{opacity:0}}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--purple-dark);border-radius:5px}
+@media(max-width:640px){header.topbar{display:none!important}h1,h1.hero-title{font-size:clamp(22px,7.5vw,30px)!important;line-height:1.15}h2{font-size:22px!important}.hero{padding:28px 0 36px}section{padding:28px 0!important}.stat-num{font-size:28px!important}}
+@media(prefers-reduced-motion:reduce){canvas#matrix-rain{display:none}}
 </style>
 </head>
 <body>
-
-<section class="hero">
-  <div>
-    <p style="color:#a78bfa;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">🤖 Agente SDR com IA</p>
-    <h1>Seu próximo cliente já está sendo<br><span>prospectado.</span><br>Enquanto você dorme.</h1>
-    <p>Agente SDR autônomo que prospecta, qualifica e agenda reuniões 24/7 — sem salário, sem férias, sem erro humano.</p>
-    <a href="#preco" class="btn-cta">QUERO MEU SDR TRABALHANDO AGORA →</a>
-    <p style="margin-top:16px;font-size:0.85rem;color:#475569">14 dias de garantia · Sem fidelidade · Setup em 48h</p>
+<canvas id="matrix-rain"></canvas>
+<header class="alert-bar">
+  <div class="alert-inner">
+    <span class="alert-pulse"></span>
+    <span class="alert-text">SEU PRÓXIMO CLIENTE JÁ ESTÁ SENDO PROSPECTADO!</span>
+    <span class="alert-pulse"></span>
   </div>
-</section>
-
-<div style="background:#0a0a1a;padding:40px 20px;text-align:center;border-top:1px solid rgba(255,255,255,0.05)">
-  <p style="color:#475569;font-size:0.85rem;text-transform:uppercase;letter-spacing:2px">Operando agora em empresas de</p>
-  <div style="display:flex;justify-content:center;gap:40px;margin-top:20px;flex-wrap:wrap;color:#334155;font-weight:700;font-size:1.1rem">
-    <span>SaaS</span><span>Infoprodutos</span><span>Agências</span><span>Consultorias</span><span>B2B</span>
+</header>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand-mark">LUNA.SDR<span style="animation:blink 1s steps(2) infinite;margin-left:2px">_</span></div>
+      <div class="brand-tag">agente autonomo // v1.0</div>
+    </div>
+    <a href="https://t.me/LunaJDbot" class="btn-mini">CONTRATAR</a>
   </div>
-</div>
-
-<div class="section">
-  <h2>Você está perdendo clientes todos os dias</h2>
-  <div class="cards">
-    <div class="card"><div class="card-icon">😴</div><h3>Leads fora do horário</h3><p>Interessados chegam à meia-noite e não recebem resposta. Quando você acorda, já foram para o concorrente.</p></div>
-    <div class="card"><div class="card-icon">🗑️</div><h3>80% do tempo em leads frios</h3><p>Sua equipe gasta energia em prospects que nunca vão comprar. SDR autônomo qualifica antes de chegar em você.</p></div>
-    <div class="card"><div class="card-icon">📉</div><h3>Follow-up esquecido</h3><p>70% das vendas exigem 5+ contatos. Manualmente, isso não acontece. O agente faz followup automático por 7 dias.</p></div>
-    <div class="card"><div class="card-icon">💸</div><h3>SDR humano custa R$4.500+/mês</h3><p>Salário + encargos + treinamento + turnover. E ainda trabalha só 8h/dia, 5 dias por semana.</p></div>
-  </div>
-</div>
-
-<div class="section">
-  <h2>Luna SDR: o agente que nunca para</h2>
-  <div class="cards">
-    <div class="card"><div class="card-icon">🔍</div><h3>Prospecção automática</h3><p>Busca leads no LinkedIn, Instagram e email conforme seu ICP. Sem lista manual.</p></div>
-    <div class="card"><div class="card-icon">💬</div><h3>Qualificação inteligente</h3><p>Conversa por Telegram/WhatsApp, faz as perguntas certas e filtra quem tem potencial real.</p></div>
-    <div class="card"><div class="card-icon">📅</div><h3>Agendamento direto</h3><p>Integra com seu calendário e marca reuniões sem você precisar fazer nada.</p></div>
-    <div class="card"><div class="card-icon">🔁</div><h3>Follow-up em sequência</h3><p>Sequência automática de 7 dias. Cada mensagem personalizada. Zero leads abandonados.</p></div>
-    <div class="card"><div class="card-icon">📊</div><h3>Relatório diário</h3><p>Resumo de performance no seu Telegram todo dia às 8h. Quantos prospectados, qualificados, agendados.</p></div>
-    <div class="card"><div class="card-icon">🔗</div><h3>Integração com CRM</h3><p>Conecta com qualquer CRM via webhook. Dados organizados automaticamente sem intervenção manual.</p></div>
-  </div>
-  <div class="stats">
-    <div class="stat"><div class="stat-num">3x</div><div class="stat-label">mais leads qualificados por semana</div></div>
-    <div class="stat"><div class="stat-num">&lt;5min</div><div class="stat-label">tempo de resposta a qualquer hora</div></div>
-    <div class="stat"><div class="stat-num">87%</div><div class="stat-label">redução no custo de aquisição</div></div>
-    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">operando sem pausas</div></div>
-  </div>
-</div>
-
-<div class="section">
-  <h2>Como funciona</h2>
-  <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-    <div class="card" style="border-color:rgba(124,58,237,0.4)"><div style="font-size:2.5rem;font-weight:900;color:#7c3aed">01</div><h3>Setup em 48h</h3><p>Configuramos o agente com seu produto, tom de voz e ICP. Você só responde um formulário.</p></div>
-    <div class="card" style="border-color:rgba(124,58,237,0.4)"><div style="font-size:2.5rem;font-weight:900;color:#7c3aed">02</div><h3>Ativa e monitora</h3><p>O agente começa a prospectar. Você acompanha tudo pelo Telegram em tempo real.</p></div>
-    <div class="card" style="border-color:rgba(124,58,237,0.4)"><div style="font-size:2.5rem;font-weight:900;color:#7c3aed">03</div><h3>Só entra em reunião qualificada</h3><p>Você foca em fechar negócio. O trabalho pesado fica com o agente.</p></div>
-  </div>
-</div>
-
-<div class="section" id="preco">
-  <h2>Investimento</h2>
-  <div class="pricing">
-    <p style="color:#a78bfa;font-size:0.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px">Plano único · Sem surpresas</p>
-    <div class="price">R$1.500<span>/mês</span></div>
-    <ul class="price-features">
-      <li>Setup completo em 48h</li>
-      <li>Agente SDR operando 24/7</li>
-      <li>Suporte via Telegram</li>
-      <li>Relatórios semanais de performance</li>
-      <li>1 integração CRM incluída</li>
-      <li>14 dias de garantia incondicional</li>
-    </ul>
-    <a href="https://t.me/LunaJDbot" class="btn-cta" style="display:block;margin-bottom:12px">CONTRATAR LUNA SDR →</a>
-    <p style="font-size:0.8rem;color:#475569">Vagas limitadas — máximo 10 clientes simultâneos</p>
-  </div>
-</div>
-
-<div class="section">
-  <h2>Perguntas frequentes</h2>
-  <div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
-    <div class="card"><h3>Preciso ter equipe técnica?</h3><p style="margin-top:8px">Não. Configuramos tudo em 48h. Você só precisa responder um formulário de onboarding.</p></div>
-    <div class="card"><h3>Funciona para meu segmento?</h3><p style="margin-top:8px">Sim — B2B, infoprodutos, serviços, SaaS, consultorias. Se você vende para pessoa jurídica ou B2C qualificado, funciona.</p></div>
-    <div class="card"><h3>Como acompanho o trabalho do agente?</h3><p style="margin-top:8px">Dashboard + relatório diário no seu Telegram. Você vê tudo que o agente fez em tempo real.</p></div>
-    <div class="card"><h3>E se eu não gostar?</h3><p style="margin-top:8px">14 dias de garantia incondicional. Cancelamento imediato sem burocracia ou multa.</p></div>
-    <div class="card"><h3>Qual canal o agente usa?</h3><p style="margin-top:8px">Telegram, WhatsApp, email e LinkedIn. Você escolhe quais ativar no onboarding.</p></div>
-  </div>
-</div>
-
-<div style="background:linear-gradient(135deg,#1e0a4e,#0f172a);padding:80px 20px;text-align:center">
-  <h2 style="font-size:2.5rem;font-weight:900;margin-bottom:16px">Pronto para prospectar enquanto você dorme?</h2>
-  <p style="color:#94a3b8;margin-bottom:40px;font-size:1.1rem">Setup em 48h. 14 dias de garantia. Cancele quando quiser.</p>
-  <a href="https://t.me/LunaJDbot" class="btn-cta">QUERO MEU SDR AGORA →</a>
-</div>
-
+</header>
+<main class="content">
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="hero-tag"><span class="pulse-dot"></span> SISTEMA ONLINE 24/7</div>
+          <h1 class="hero-title">Seu próximo cliente<br><span class="accent">já está sendo</span><br>prospectado.</h1>
+          <p class="hero-sub">Agente SDR autônomo <strong>24/7</strong> — sem salário, sem férias, sem erro humano. Prospecta, qualifica e agenda reuniões enquanto você dorme.</p>
+          <div class="hero-stamp">Setup em <b>48 horas</b>. 14 dias de garantia. Cancele quando quiser.</div>
+          <a href="https://t.me/LunaJDbot" class="btn">QUERO MEU SDR AGORA</a>
+        </div>
+        <div class="hero-image-wrap">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="term-title">luna-sdr@sistema:~$ ./prospect --mode=24h</span>
+          </div>
+          <div class="term-content">
+            <div><span style="color:#7c3aed">$ </span>./prospect --target=ICP --channels=all</div>
+            <div style="color:#7c3aed;margin-top:8px">&#9658; Iniciando varredura LinkedIn...</div>
+            <div style="color:#7c3aed">&#9658; 3 leads qualificados identificados</div>
+            <div style="color:#a78bfa">&#9658; Agendando reunião para 09:00 amanhã</div>
+            <div style="color:#e8e6df">&#9658; Enviando followup sequência dia 3</div>
+            <div style="margin-top:12px"><span style="color:#7c3aed">&#9679;</span> <b style="color:#7c3aed">SISTEMA OPERANDO</b> — 247 prospects ativos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="stats" style="padding:36px 0">
+    <div class="container">
+      <div class="stats-grid">
+        <div><div class="stat-num">3x</div><div class="stat-label">Mais Leads Qualificados</div></div>
+        <div><div class="stat-num">&lt;5min</div><div class="stat-label">Resposta a Qualquer Hora</div></div>
+        <div><div class="stat-num">87%</div><div class="stat-label">Redução no Custo</div></div>
+        <div><div class="stat-num">24/7</div><div class="stat-label">Operando Sem Pausas</div></div>
+      </div>
+    </div>
+  </section>
+  <section id="beneficios">
+    <div class="container">
+      <span class="section-tag">// problemas.que.resolve</span>
+      <h2>Por que seu pipeline <span class="accent">falha</span></h2>
+      <p class="section-lead">Leads perdidos, custo alto, followup esquecido. O agente SDR resolve tudo operando 24/7 sem exceção.</p>
+      <div class="agents-grid">
+        <article class="agent-card">
+          <div class="agent-icon">[&gt;_]</div>
+          <div class="agent-name">LEADS PERDIDOS</div>
+          <div class="agent-role">fora do horário comercial</div>
+          <p class="agent-desc">Interessados chegam à meia-noite e não recebem resposta. Quando você acorda, já foram para o concorrente. O agente responde em menos de 5 minutos a qualquer hora.</p>
+        </article>
+        <article class="agent-card">
+          <div class="agent-icon">[%_]</div>
+          <div class="agent-name">LEADS FRIOS</div>
+          <div class="agent-role">80% do tempo da equipe</div>
+          <p class="agent-desc">Sua equipe gasta energia em prospects que nunca vão comprar. O SDR faz a qualificação antes de chegar em você — só passa quem tem potencial real.</p>
+        </article>
+        <article class="agent-card">
+          <div class="agent-icon">[!_]</div>
+          <div class="agent-name">FOLLOWUP ESQUECIDO</div>
+          <div class="agent-role">70% das vendas exigem 5+ contatos</div>
+          <p class="agent-desc">Manualmente isso não acontece. O agente executa sequência automática de 7 dias. Cada mensagem personalizada. Zero leads abandonados no pipeline.</p>
+        </article>
+        <article class="agent-card">
+          <div class="agent-icon">[R$]</div>
+          <div class="agent-name">CUSTO ALTO</div>
+          <div class="agent-role">R$4.500+ por mês</div>
+          <p class="agent-desc">SDR humano: salário + encargos + treinamento + turnover. Trabalha só 8h/dia. O agente custa 87% menos, trabalha 24h e não pede férias.</p>
+        </article>
+        <article class="agent-card">
+          <div class="agent-icon">[+_]</div>
+          <div class="agent-name">PROSPECÇÃO ATIVA</div>
+          <div class="agent-role">LinkedIn, WhatsApp, Email</div>
+          <p class="agent-desc">Busca leads conforme seu ICP em múltiplos canais. Sem lista manual. Sem copiar e colar. Só confirme os critérios do cliente ideal e o agente vai atrás.</p>
+        </article>
+        <article class="agent-card">
+          <div class="agent-icon">[@_]</div>
+          <div class="agent-name">AGENDAMENTO DIRETO</div>
+          <div class="agent-role">integrado ao calendário</div>
+          <p class="agent-desc">Conversa, qualifica e agenda reuniões direto no seu calendário. Você só entra na call com prospect já aquecido. Sem vai e vem de horários.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+  <section class="positioning">
+    <div class="container">
+      <div class="positioning-block">
+        <div class="neg">Não é funcionário. Não é chatbot.</div>
+        <div class="pos">É o agente que prospecta, qualifica e agenda por você 24 horas por dia.</div>
+      </div>
+    </div>
+  </section>
+  <section id="como-funciona" style="background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(124,58,237,0.025) 50%,rgba(0,0,0,0) 100%)">
+    <div class="container">
+      <span class="section-tag">// como.funciona</span>
+      <h2>Em <span class="accent">3 passos</span></h2>
+      <p class="section-lead">Da contratação até o primeiro lead qualificado em menos de 48 horas.</p>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-num">01</div><div class="step-title">Setup em 48h</div><p class="step-desc">Configuramos o agente com seu produto, tom de voz e ICP. Você só responde um formulário de onboarding.</p></div>
+        <div class="step-card"><div class="step-num">02</div><div class="step-title">Ativa e monitora</div><p class="step-desc">O agente começa a prospectar. Você acompanha pelo Telegram em tempo real com relatório diário de performance.</p></div>
+        <div class="step-card"><div class="step-num">03</div><div class="step-title">Só entra em reunião qualificada</div><p class="step-desc">Você foca em fechar negócio. O trabalho pesado — prospecção, qualificação, followup — fica com o agente.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="pricing-section" id="investimento">
+    <div class="container" style="text-align:center">
+      <span class="section-tag">// investimento</span>
+      <h2 style="text-align:center">Investimento</h2>
+      <p class="section-lead" style="margin:0 auto;text-align:center">Plano único. Sem surpresas. Sem cobrança por resultado ou por seat.</p>
+      <div class="pricing-card">
+        <div class="pricing-row">
+          <div class="label">Plano Único</div>
+          <div class="amount"><small>R$</small> 1.500<small>,00/mês</small></div>
+          <div class="note">sem fidelidade · cancele quando quiser</div>
+        </div>
+        <ul class="pricing-features">
+          <li>Setup completo em 48h</li>
+          <li>Agente SDR operando 24/7</li>
+          <li>Prospecção em LinkedIn, WhatsApp e Email</li>
+          <li>Suporte via Telegram</li>
+          <li>Relatório diário de performance</li>
+          <li>1 integração CRM incluída</li>
+          <li>14 dias de garantia incondicional</li>
+          <li>Vagas limitadas — máximo 10 clientes simultâneos</li>
+        </ul>
+        <a href="https://t.me/LunaJDbot" class="btn">CONTRATAR LUNA SDR</a>
+      </div>
+    </div>
+  </section>
+</main>
 <footer>
-  <p>Luna SDR — Agente autônomo de prospecção | <a href="https://t.me/LunaJDbot">Telegram</a></p>
-  <p style="margin-top:8px">© 2026 · Tecnologia proprietária</p>
+  <div class="container">
+    <div class="footer-trio">
+      <div class="power luna"><div class="ic">[ L ]</div><div class="name">Luna</div><div class="tag">orquestradora</div></div>
+      <div class="power openclaw"><div class="ic">{&lt;&gt;}</div><div class="name">OpenClaw</div><div class="tag">infraestrutura agêntica</div></div>
+      <div class="power telegram"><div class="ic">$_</div><div class="name">Telegram</div><div class="tag">@LunaJDbot</div></div>
+    </div>
+    <div class="copyright">&copy; 2026 Luna SDR — Agente autônomo de prospecção</div>
+  </div>
 </footer>
-
+<script>
+(function(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var canvas=document.getElementById('matrix-rain');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var w,h,columns,drops;
+  var chars='012345ABCDEF<>{}[]/=+-*';
+  function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;var fs=16;columns=Math.floor(w/fs);drops=new Array(columns).fill(1);ctx.font=fs+'px JetBrains Mono,monospace';}
+  function draw(){ctx.fillStyle='rgba(0,0,0,0.06)';ctx.fillRect(0,0,w,h);ctx.fillStyle='#7c3aed';for(var i=0;i<drops.length;i++){var t=chars[Math.floor(Math.random()*chars.length)];ctx.fillText(t,i*16,drops[i]*16);if(drops[i]*16>h&&Math.random()>0.975)drops[i]=0;drops[i]++;}}
+  resize();window.addEventListener('resize',resize);setInterval(draw,60);
+})();
+</script>
 </body>
 </html>
